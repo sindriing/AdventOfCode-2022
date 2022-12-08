@@ -3,16 +3,59 @@ use std::io::{self, BufRead};
 use std::path::Path;
 
 fn main() {
-    let lines = read_lines("input.txt").expect("Could not read file");
-    let sum = sum_duplicated_items(lines);
-    println!("Sum: {}", sum);
+    part_a();
+    part_b();
 }
 
 fn part_a() {
+    println!("Part A:");
     let lines = read_lines("input.txt").expect("Could not read file");
     let sum = sum_duplicated_items(lines);
     println!("Sum: {}", sum);
+    println!("---------------------------------");
+}
 
+fn part_b() {
+    println!("Part B:");
+    let mut lines = read_lines("input.txt").expect("Could not read file");
+    let mut sum = 0;
+    while let Some(mut group) = get_three_lines(&mut lines) {
+        group.sort();
+        if let Some(key) = find_triple(group) {
+            sum += char_to_priority(key).unwrap();
+        } else {
+            panic!("No key found");
+        }
+    }
+    println!("Sum: {}", sum);
+}
+
+fn get_three_lines(lines: &mut io::Lines<io::BufReader<File>>) -> Option<Vec<char>> {
+    let mut group: Vec<char> = vec![];
+
+    for _ in 0..3 { // change it to get range
+        if let Some(line) = lines.next() {
+            // line = line.expect("Failed to parse line in get_three_lines");
+            let chars: Vec<char> = line.expect("bla").chars().collect();
+            let mut chars = remove_duplicates_from_elves(chars);
+            group.append(&mut chars);
+        } else {
+            return None;
+        }
+    }
+    Some(group)
+}
+
+fn remove_duplicates_from_elves(chars: Vec<char>) -> Vec<char> {
+    // split into two halves
+    let half1 = chars[..chars.len()/2].to_vec();
+    let mut half1 = sort_and_remove_duplicates(half1);
+    let half2 = chars[chars.len()/2..].to_vec();
+    let mut half2 = sort_and_remove_duplicates(half2);
+    // join the halves with no duplicates
+    half1.append(&mut half2);
+    half1.sort();
+    half1
 }
 
 fn sum_duplicated_items(mut lines: io::Lines<io::BufReader<File>>) -> i32 {
@@ -21,18 +64,8 @@ fn sum_duplicated_items(mut lines: io::Lines<io::BufReader<File>>) -> i32 {
         if let Ok(line) = line {
             // convert string to vector of chars
             let chars: Vec<char> = line.chars().collect();
-
-            // split into two halves
-            let half1 = chars[..chars.len()/2].to_vec();
-            let mut half1 = sort_and_remove_duplicates(half1);
-            let half2 = chars[chars.len()/2..].to_vec();
-            let mut half2 = sort_and_remove_duplicates(half2);
-
-            // join the halves with no duplicates
-            half1.append(&mut half2);
-            half1.sort();
-            let dup = find_duplicate(half1);
-
+            let no_duplicates = remove_duplicates_from_elves(chars);
+            let dup = find_duplicate(no_duplicates);
             let prio = char_to_priority(dup.unwrap());
             match prio {
                 Some(prio) => sum += prio,
@@ -61,6 +94,25 @@ fn sort_and_remove_duplicates(mut arr: Vec<char>) -> Vec<char> {
     }
     other
 }
+
+// find a character in a sorted array that appears three times
+fn find_triple(arr: Vec<char>) -> Option<char> {
+    let mut last_char = ' ';
+    let mut count = 0;
+    for c in arr {
+        if c == last_char {
+            count += 1;
+        } else {
+            last_char = c;
+            count = 0;
+        }
+        if count == 2 {
+            return Some(c);
+        }
+    }
+    None
+}
+
 
 // Find duplicate character in sorted vector
 fn find_duplicate(vec: Vec<char>) -> Option<char> {
