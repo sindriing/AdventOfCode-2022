@@ -1,5 +1,5 @@
-// use std::{char, error::Error, fs::read_to_string};
-use std::{env::args, error::Error, fs::read_to_string};
+use std::error::Error;
+use utils::{Part, pick_part_to_solve, read_input_file};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let stack_file = "stack.txt".to_owned();
@@ -25,20 +25,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     print_top_of_stacks(&stacks);
 
     Ok(())
-}
-
-enum Part {
-    A,
-    B,
-}
-
-fn pick_part_to_solve() -> Result<Part, Box<dyn Error>> {
-    let part = args().nth(1).ok_or("Do you want to solve part A or B?")?;
-    match part.to_lowercase().as_str() {
-        "a" => Ok(Part::A),
-        "b" => Ok(Part::B),
-        _ => Err("Please select a part")?,
-    }
 }
 
 struct CraneMove {
@@ -108,9 +94,4 @@ fn get_crane_moves(lines: String) -> Vec<CraneMove> {
         crane_moves.push(new_move);
     }
     crane_moves
-}
-
-pub fn read_input_file(filepath: String) -> Result<String, Box<dyn Error>> {
-    let file_content = read_to_string(filepath)?;
-    Ok(file_content)
 }
