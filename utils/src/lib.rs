@@ -12,7 +12,7 @@ pub enum Part {
 }
 
 pub fn pick_part_to_solve() -> Result<Part, Box<dyn Error>> {
-    let part = args().nth(1).ok_or("Do you want to solve part A or B?")?;
+    let part = args().nth(1).ok_or("Do you want to solve part A or B?\n")?;
     match part.to_lowercase().as_str() {
         "a" => Ok(Part::A),
         "b" => Ok(Part::B),
