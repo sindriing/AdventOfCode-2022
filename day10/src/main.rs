@@ -1,5 +1,4 @@
-// use utils::{pick_part_to_solve, read_input_file, Part};
-use utils::read_input_file;
+use utils::{pick_part_to_solve, read_input_file, Part};
 use std::error::Error;
 use std::str::Lines;
 
@@ -9,12 +8,64 @@ fn main() -> Result<(), Box<dyn Error>> {
     let input = read_input_file(filename)?;
     let mut lines = input.lines();
 
+    let part = pick_part_to_solve()?;
+    if part == Part::A {
+        part_a(&mut lines);
+    } else if part == Part::B {
+        part_b(&mut lines);
+    } else {
+        Err("Please select a part [A/B]")?;
+    }
+
     let answer_a = part_a(&mut lines);
     println!("Part A: {}", answer_a);
 
     Ok(())
 }
 
+// much nicer than part a
+fn part_b(mut lines: &mut Lines) {
+    let instructions = create_instructions(&mut lines);
+    let mut line_point = 0;
+    let mut sprite_location = 1;
+    for inst in instructions {
+        match overlaps_sprite(&sprite_location, &line_point) {
+            true => print!("#"),
+            false => print!("."),
+        }
+        sprite_location += inst;
+
+        line_point += 1;
+        if line_point >= 40 {
+            println!("");
+            line_point = 0;
+        }
+    }
+}
+
+fn overlaps_sprite(sprite: &i32, pix: &i32) -> bool {
+    return *pix - 1 == *sprite || *pix == *sprite || *pix + 1 == *sprite;
+}
+
+fn create_instructions(lines: &mut Lines) -> Vec<i32> {
+    let mut instructions = Vec::new();
+    for line in lines {
+        if line[..4] == *"addx" {
+            let to_add = line[5..].parse::<i32>().unwrap();
+            instructions.push(0);
+            instructions.push(to_add);
+        } else if line[..4] == *"noop" {
+            instructions.push(0);
+        }
+        else {
+            println!("Unknown instruction: {}", line);
+            panic!("Unknown instruction");
+        }
+    }
+    instructions
+}
+
+// Ohh boy was this a bad solution...
 fn part_a(lines: &mut Lines) -> i32 {
     let mut counter = 1;
     let mut accum = 0;
@@ -52,25 +103,10 @@ fn round_cycles(cycles: &i32) -> i32 {
 }
 
 fn noop_check_cycle(cycles: &i32) -> bool {
-    // 60 -> 61
-    // 20 -> 21
-    // println!("cycles: {}, mod: {}", cycles, (cycles +20) % 40);
     (cycles + 20) % 40 == 0
 }
 
 fn add_check_cycle(cycles: &i32) -> bool {
-    // 19 -> 21
-    // 59 -> 61 
-    // 60 -> 62
-    // println!("cycles: {}, mod: {}", cycles, (cycles + 20) % 40);
     let temp = (cycles + 20) % 40;
     temp == 0 || temp == 39
 }
-
-// fn check_cycles(cycles: &i32, addition: i32) -> bool {
-//     let before = (cycles - 22) % 40; 
-//     let after = (cycles - 22 + addition) % 40;
-//     // println!("cycles: {}, before: {}, after: {}", cycles, before, after);
-//     return before > after;
-
-// }
