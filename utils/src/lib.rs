@@ -6,6 +6,7 @@ pub fn read_input_file(filepath: String) -> Result<String, Box<dyn Error>> {
     Ok(file_content)
 }
 
+#[derive(PartialEq)]
 pub enum Part {
     A,
     B,
