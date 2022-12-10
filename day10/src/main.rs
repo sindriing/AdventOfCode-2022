@@ -1,6 +1,6 @@
-use utils::{pick_part_to_solve, read_input_file, Part};
 use std::error::Error;
 use std::str::Lines;
+use utils::{pick_part_to_solve, read_input_file, Part};
 
 fn main() -> Result<(), Box<dyn Error>> {
     // let filename = "test.txt".to_string();
@@ -56,8 +56,7 @@ fn create_instructions(lines: &mut Lines) -> Vec<i32> {
             instructions.push(to_add);
         } else if line[..4] == *"noop" {
             instructions.push(0);
-        }
-        else {
+        } else {
             println!("Unknown instruction: {}", line);
             panic!("Unknown instruction");
         }
@@ -72,22 +71,32 @@ fn part_a(lines: &mut Lines) -> i32 {
     let mut cycles = 1;
     while let Some(line) = lines.next() {
         if line[..4] == *"addx" {
-            if add_check_cycle(&cycles){
+            if add_check_cycle(&cycles) {
                 accum += counter * round_cycles(&cycles);
                 let temp = round_cycles(&cycles);
-                println!("ADD - Adding {} to accum. Cycle: {} -> {}, , X: {}", counter * round_cycles(&cycles), cycles, temp, counter);
+                println!(
+                    "ADD - Adding {} to accum. Cycle: {} -> {}, , X: {}",
+                    counter * round_cycles(&cycles),
+                    cycles,
+                    temp,
+                    counter
+                );
             }
             let to_add = line[5..].parse::<i32>().unwrap();
             cycles += 2;
             counter += to_add;
         } else if line[..4] == *"noop" {
             if noop_check_cycle(&cycles) {
-                println!("NOOP - Adding {} to accum. Cycle: {}, X: {}", counter * round_cycles(&cycles), cycles, counter);
+                println!(
+                    "NOOP - Adding {} to accum. Cycle: {}, X: {}",
+                    counter * round_cycles(&cycles),
+                    cycles,
+                    counter
+                );
                 accum += counter * cycles;
             }
             cycles += 1;
-        }
-        else {
+        } else {
             panic!("Unknown instruction");
         }
     }
