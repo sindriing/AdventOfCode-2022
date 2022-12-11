@@ -2,6 +2,7 @@ use rust_math::num::lcm;
 use std::collections::VecDeque;
 use std::error::Error;
 use std::fmt;
+use itertools::Itertools;
 use utils::{pick_part_to_solve, Part};
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -110,10 +111,10 @@ fn part_a() {
     let mut monkeys = input_monkeys();
     println!("Part A:");
 
-    let mut monkey_lcm = 1;
-    for monkey in &monkeys {
-        monkey_lcm = lcm(monkey_lcm, monkey.test_mod as i32);
-    }
+    let monkey_lcm = monkeys
+        .iter()
+        .map(|m| m.test_mod as i32)
+        .fold(1, |acc, x| lcm(acc, x));
 
     for _ in 0..20 {
         for from in 0..monkeys.len() {
@@ -129,12 +130,13 @@ fn part_b() {
     println!("Part B");
     let mut monkeys = input_monkeys();
 
-    // setup for part b
-    let mut monkey_lcm = 1;
-    for monkey in &mut monkeys {
-        monkey.not_bored();
-        monkey_lcm = lcm(monkey_lcm, monkey.test_mod as i32);
-    }
+    monkeys.iter_mut().for_each(|m| m.not_bored());
+
+    let monkey_lcm = monkeys
+        .iter()
+        .map(|m| m.test_mod as i32)
+        .fold(1, |acc, x| lcm(acc, x));
+
 
     for _ in 0..10000 {
         for from in 0..monkeys.len() {
@@ -147,10 +149,11 @@ fn part_b() {
 }
 
 fn find_monkeybusiness(monkeys: &Vec<Monkey>) -> u64 {
-    let mut inspections = monkeys.iter().map(|m| m.inspections).collect::<Vec<i64>>();
-
-    inspections.sort();
-    inspections[inspections.len() - 2] as u64 * inspections[inspections.len() - 1] as u64
+    let inspections = monkeys.iter()
+        .map(|m| m.inspections)
+        .sorted_by(|a, b| b.cmp(a))
+        .collect_vec();
+    inspections[0] as u64 * inspections[1] as u64
 }
 
 fn do_round(monkeys: &mut Vec<Monkey>, from: usize, monkey_lcm: i64) {
